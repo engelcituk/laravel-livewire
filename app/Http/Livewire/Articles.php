@@ -14,10 +14,12 @@ class Articles extends Component
     }
     */
 
+    public $search = '';
+
     public function render()
     {
         return view('livewire.articles',[
-            'articles' => \App\Models\Article::all()
+            'articles' => \App\Models\Article::where('title', 'like', "%{$this->search}%")->get()
         ]);
     }
 }
