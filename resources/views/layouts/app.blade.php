@@ -23,13 +23,19 @@
     </head>
     <body class="antialiased">
         
-           
+        {{$slot}}
 
-           @livewire('articles')
-           @livewire('articles.index')
-           @livewire('users-list')
-           @livewire('inline')
-           @livewire('inline-component')
+        {{-- <livewire:articles > --}}
+        
+        {{--
+            @livewire('articles',['h1'=>'Listado 1'])
+            @livewire('articles')
+            @livewire('articles.index')
+            @livewire('users-list')
+            @livewire('inline')
+            @livewire('inline-component')
+            --}}
+           
       
         @livewireScripts
     </body>

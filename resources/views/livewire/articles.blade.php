@@ -1,3 +1,10 @@
 <div>
-    Lorem ipsum dolor, sit amet consectetur adipisicing elit. Accusantium quisquam omnis quo exercitationem laudantium porro enim animi corrupti dignissimos impedit perspiciatis reiciendis, aperiam, ipsam quaerat nesciunt delectus ex eius sequi.
+    <h1>
+        Listado de articulos
+    </h1>
+    <ul>
+        @foreach ($articles as $article)
+            <li>{{$article->title}}</li>
+        @endforeach
+    </ul>
 </div>
