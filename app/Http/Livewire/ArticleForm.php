@@ -6,12 +6,11 @@ use Livewire\Component;
 
 class ArticleForm extends Component
 {
-    public $title;
-    public $content;
+    public Article $article;
 
     protected $rules = [
-        'title' => ['required','min:4'],
-        'content' => ['required'],
+        'article.title' => ['required','min:4'],
+        'article.content' => ['required'],
     ];
     
     /*
@@ -23,6 +22,11 @@ class ArticleForm extends Component
         'title' => 'título',
     ];*/
 
+    public function mount(Article $article)
+    {
+        $this->article = $article;
+    }
+
     public function render()
     {
         return view('livewire.article-form');
@@ -33,11 +37,13 @@ class ArticleForm extends Component
         $this->validateOnly($propertyName);
     }
     public function save(){
-        $data = $this->validate();
-
-        Article::create($data);
+         
+        $this->validate();
+        
+        $this->article->save();
+        // Article::create($data);
         //$this->reset(); //reseteo todas los propiedades del componente
-        session()->flash('status',__('Artículo creado') );
+        session()->flash('status',__('Artículo guardado') );
 
         $this->redirectRoute('articles.index'); //redirijo al listado de articulo
 
