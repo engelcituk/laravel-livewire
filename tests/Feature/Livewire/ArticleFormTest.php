@@ -28,12 +28,14 @@ class ArticleFormTest extends TestCase
         Livewire::test('article-form')
         ->assertSeeHtml('wire:submit.prevent="save"')
         ->assertSeeHtml('wire:model="article.title"')
+        ->assertSeeHtml('wire:model="article.slug"')
         ->assertSeeHtml('wire:model="article.content"');
     }
     /** @test */
     public function can_create_new_articles(){
         Livewire::test('article-form')
         ->set('article.title','New article')
+        ->set('article.slug','new-article')
         ->set('article.content','Article content')
         ->call('save')
         ->assertSessionHas('status')
@@ -42,6 +44,7 @@ class ArticleFormTest extends TestCase
 
         $this->assertDatabaseHas('articles',[
             'title' => 'New article',
+            'slug' => 'new-article',
             'content' => 'Article content'
         ]);
     }
@@ -53,6 +56,46 @@ class ArticleFormTest extends TestCase
         ->call('save')
         ->assertHasErrors(['article.title'=> 'required'])
         ->assertSeeHtml(__('validation.required',['attribute' => 'title']));
+        ;
+    }
+
+    /** @test */
+    public function slug_is_required(){
+        Livewire::test('article-form')
+        ->set('article.title','New article')
+        ->set('article.content','Article content')
+        ->call('save')
+        ->assertHasErrors(['article.slug'=> 'required'])
+        ->assertSeeHtml(__('validation.required',['attribute' => 'slug']));
+        ;
+    }
+
+    /** @test */
+    public function slug_must_be_unique(){
+
+        $article = Article::factory()->create();
+
+        Livewire::test('article-form')
+        ->set('article.title','New article')
+        ->set('article.slug', $article->slug)
+        ->set('article.content','Article content')
+        ->call('save')
+        ->assertHasErrors(['article.slug'=> 'unique'])
+        ->assertSeeHtml(__('validation.unique',['attribute' => 'slug']));
+        ;
+    }
+
+     /** @test */
+     public function unique_rule_should_be_ignored_when_updating_the_same_slug(){
+
+        $article = Article::factory()->create();
+
+        Livewire::test('article-form', ['article' => $article])
+        ->set('article.title','New article')
+        ->set('article.slug', $article->slug)
+        ->set('article.content','Article content')
+        ->call('save')
+        ->assertHasNoErrors(['article.slug'=> 'unique'])
         ;
     }
 
@@ -110,8 +153,10 @@ class ArticleFormTest extends TestCase
 
         Livewire::test('article-form',['article' => $article])
         ->assertSet('article.title', $article->title)
+        ->assertSet('article.slug', $article->slug)
         ->assertSet('article.content', $article->content)
         ->set('article.title','Title updated')
+        ->set('article.slug','updated-slug')
         ->call('save')
         ->assertSessionHas('status')
         ->assertRedirect( route('articles.index') )
@@ -121,6 +166,7 @@ class ArticleFormTest extends TestCase
 
         $this->assertDatabaseHas('articles',[
             'title' => 'Title updated',
+            'slug' => 'updated-slug',
         ]);
     }
     /**

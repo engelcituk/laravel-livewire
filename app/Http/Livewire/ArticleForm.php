@@ -3,15 +3,24 @@
 namespace App\Http\Livewire;
 use App\Models\Article;
 use Livewire\Component;
+use Illuminate\Validation\Rule;
 
 class ArticleForm extends Component
 {
     public Article $article;
 
-    protected $rules = [
-        'article.title' => ['required','min:4'],
-        'article.content' => ['required'],
-    ];
+
+    public function rules(){
+        return [
+            'article.title' => ['required','min:4'],
+            'article.slug' => [
+                'required',
+                Rule::unique('articles', 'slug')->ignore($this->article)
+            ],
+                //'unique:articles,slug,'.$this->article->id],// unico en la tabla articles, el campo slug, se ignora al editar
+            'article.content' => ['required'],
+        ];
+    }
     
     /*
     protected $messages = [
