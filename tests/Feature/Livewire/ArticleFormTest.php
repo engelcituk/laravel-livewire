@@ -63,6 +63,7 @@ class ArticleFormTest extends TestCase
     public function slug_is_required(){
         Livewire::test('article-form')
         ->set('article.title','New article')
+        ->set('article.slug',null)
         ->set('article.content','Article content')
         ->call('save')
         ->assertHasErrors(['article.slug'=> 'required'])
@@ -84,6 +85,22 @@ class ArticleFormTest extends TestCase
         ->assertSeeHtml(__('validation.unique',['attribute' => 'slug']));
         ;
     }
+
+    /** @test */
+    public function slug_must_only_contains_letters_numbers_dashes_and_underscores(){
+
+        $article = Article::factory()->create();
+
+        Livewire::test('article-form')
+        ->set('article.title','New article')
+        ->set('article.slug', 'new-article$%^')
+        ->set('article.content','Article content')
+        ->call('save')
+        ->assertHasErrors(['article.slug'=> 'alpha_dash'])
+        ->assertSeeHtml(__('validation.alpha_dash',['attribute' => 'slug']));
+        ;
+    }
+
 
      /** @test */
      public function unique_rule_should_be_ignored_when_updating_the_same_slug(){
@@ -169,6 +186,15 @@ class ArticleFormTest extends TestCase
             'slug' => 'updated-slug',
         ]);
     }
+
+     /** @test */
+     public function slug_is_generated_automatically(){
+        Livewire::test('article-form')
+        ->set('article.title', 'Nuevo articulo')
+        ->assertSet('article.slug','nuevo-articulo')
+        ;
+
+     }
     /**
      * php artisan test --filter real_time_validation_works_for_content
      */

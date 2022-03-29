@@ -4,6 +4,7 @@ namespace App\Http\Livewire;
 use App\Models\Article;
 use Livewire\Component;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class ArticleForm extends Component
 {
@@ -15,6 +16,7 @@ class ArticleForm extends Component
             'article.title' => ['required','min:4'],
             'article.slug' => [
                 'required',
+                'alpha_dash',
                 Rule::unique('articles', 'slug')->ignore($this->article)
             ],
                 //'unique:articles,slug,'.$this->article->id],// unico en la tabla articles, el campo slug, se ignora al editar
@@ -45,6 +47,12 @@ class ArticleForm extends Component
     {
         $this->validateOnly($propertyName);
     }
+
+    public function updatedArticleTitle($title)
+    {
+        $this->article->slug = Str::slug($title);
+    }
+
     public function save(){
          
         $this->validate();
