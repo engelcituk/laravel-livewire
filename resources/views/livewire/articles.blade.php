@@ -1,5 +1,7 @@
 <div>
-    <h1> Listado de articulos: </h1>
+    <x-slot name="header">
+        <h1> Listado de articulos: </h1>
+    </x-slot>
     <a href="{{route('articles.create')}}">Crear</a>
     <input type="text" placeholder="Buscar" wire:model="search">
     <br>
