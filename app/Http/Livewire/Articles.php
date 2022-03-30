@@ -20,6 +20,6 @@ class Articles extends Component
     {
         return view('livewire.articles',[
             'articles' => \App\Models\Article::where('title', 'like', "%{$this->search}%")->latest()->get()
-        ]);
+        ])->layout('layouts.guest');
     }
 }

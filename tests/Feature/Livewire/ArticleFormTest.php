@@ -220,7 +220,9 @@ class ArticleFormTest extends TestCase
 
      }
     /**
+     * php artisan test 
      * php artisan test --filter real_time_validation_works_for_content
+     * php artisan test --stop-on-failure
      */
 
 
