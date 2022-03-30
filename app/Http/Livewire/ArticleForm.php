@@ -5,6 +5,7 @@ use App\Models\Article;
 use Livewire\Component;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class ArticleForm extends Component
 {
@@ -56,8 +57,10 @@ class ArticleForm extends Component
     public function save(){
          
         $this->validate();
-        
-        $this->article->save();
+
+        Auth::user()->articles()->save($this->article);
+        // $this->article->user_id = auth()->id;
+        // $this->article->save();
         // Article::create($data);
         //$this->reset(); //reseteo todas los propiedades del componente
         session()->flash('status',__('Artículo guardado') );
