@@ -16,6 +16,9 @@
                 
                 <x-slot name="form">
                     <div class="col-span-6 sm:col-span-4">
+                        <pre>{{$article->title}}</pre>
+                        <pre>{{$article->content}}</pre> 
+
                         <x-jet-label :value="__('Title')" for="title"/>
                         <x-jet-input wire:model="article.title" type="text" id="title" name="title" class="mt-1 block w-full"/>
                         <x-jet-input-error for="article.title" class="mt-2"/>
@@ -29,7 +32,8 @@
 
                     <div class="col-span-6 sm:col-span-4">
                         <x-jet-label :value="__('Content')" for="content"/>
-                        <x-textarea rows="3" wire:model="article.content" id="content" name="content" class="mt-1 block w-full"/>
+                        <x-html-editor rows="3" wire:model="article.content" id="content" name="content" class="mt-1 block w-full"></x-html-editor>
+                        {{-- <x-textarea rows="3" wire:model="article.content" id="content" name="content" class="mt-1 block w-full"/> --}}
                         <x-jet-input-error for="article.content" class="mt-2"/>
                     </div> 
                     <x-slot name="actions">
