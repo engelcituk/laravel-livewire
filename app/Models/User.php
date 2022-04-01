@@ -62,4 +62,8 @@ class User extends Authenticatable
     public function articles(){
         return $this->hasMany(Article::class);
     }
+    // con este mutador, el password se encripta de manera automatica sin usar el bcryt al crear un user
+    // public function setPasswordAttribute($password){
+    //     $this->attributes['password'] = Hash::make($password);
+    // }
 }

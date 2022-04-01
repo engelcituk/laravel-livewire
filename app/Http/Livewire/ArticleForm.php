@@ -6,14 +6,18 @@ use Livewire\Component;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Livewire\WithFileUploads;
 
-class ArticleForm extends Component
-{
+class ArticleForm extends Component{
+
+    use WithFileUploads;
+
     public Article $article;
-
+    public $image;
 
     public function rules(){
         return [
+            'image' => ['image','max:2048'],
             'article.title' => ['required','min:4'],
             'article.slug' => [
                 'required',
@@ -57,6 +61,8 @@ class ArticleForm extends Component
     public function save(){
          
         $this->validate();
+
+        $this->article->image = $this->image->store('/', 'public');
 
         Auth::user()->articles()->save($this->article);
         // $this->article->user_id = auth()->id;
