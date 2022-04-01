@@ -18,7 +18,10 @@ class ArticleForm extends Component{
 
     public function rules(){
         return [
-            'image' => [],
+            'image' => [
+                Rule::requiredIf( !$this->article->image ),
+                Rule::when( $this->image, ['image', 'max:2048'] ),
+            ],
             'article.title' => ['required','min:4'],
             'article.slug' => [
                 'required',
