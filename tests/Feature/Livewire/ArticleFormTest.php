@@ -5,6 +5,8 @@ namespace Tests\Feature\Livewire;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 
 use Livewire\Livewire;
 use App\Models\Article;
@@ -46,14 +48,18 @@ class ArticleFormTest extends TestCase
         ->assertSeeHtml('wire:submit.prevent="save"')
         ->assertSeeHtml('wire:model="article.title"')
         ->assertSeeHtml('wire:model="article.slug"')
-        ->assertSeeHtml('wire:model="article.content"');
+        ;
     }
     /** @test */
     public function can_create_new_articles(){
     
+        Storage::fake('public');
+        $image = UploadedFile::fake()->image('post-image.png');
+
         $user = User::factory()->create();
     
         Livewire::actingAs($user)->test('article-form')
+        ->set('image', $image)
         ->set('article.title','New article')
         ->set('article.slug','new-article')
         ->set('article.content','Article content')
@@ -62,12 +68,71 @@ class ArticleFormTest extends TestCase
         ->assertRedirect( route('articles.index') )
         ;
 
+
         $this->assertDatabaseHas('articles',[
             'title' => 'New article',
+            'image' => $imagePath = Storage::disk('public')->files()[0],
             'slug' => 'new-article',
             'content' => 'Article content',
             'user_id' => $user->id,
         ]);
+
+        Storage::disk('public')->assertExists($imagePath);
+    }
+
+    /** @test */
+    public function can_update_articles(){
+
+        $article = Article::factory()->create();
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test('article-form',['article' => $article])
+        ->assertSet('article.image', $article->image)
+        ->assertSet('article.slug', $article->slug)
+        ->assertSet('article.content', $article->content)
+        ->set('article.title','Title updated')
+        ->set('article.slug','updated-slug')
+        ->call('save')
+        ->assertSessionHas('status')
+        ->assertRedirect( route('articles.index') )
+        ;
+
+        $this->assertDatabaseCount('articles', 1 );
+
+        $this->assertDatabaseHas('articles',[
+            'title' => 'Title updated',
+            'slug' => 'updated-slug',
+            'user_id' => $user->id,
+        ]);
+
+    }
+
+    /** @test */
+    public function can_update_articles_image(){
+
+        Storage::fake('public');
+
+        $oldImage = UploadedFile::fake()->image('old-image.png');
+        $oldImagePath = $oldImage->store('/','public');
+
+        $newImage = UploadedFile::fake()->image('new-image.png');
+
+        $article = Article::factory()->create([
+            'image' => $oldImagePath
+        ]);
+
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test('article-form',['article' => $article])
+        ->set('image', $newImage)
+        ->call('save')
+        ->assertSessionHas('status')
+        ->assertRedirect( route('articles.index') )
+        ;
+
+        Storage::disk('public')->assertExists($article->fresh()->image); //fresh vuelve a consultar la información para tener la img actualizada
+        Storage::disk('public')->assertMissing($oldImagePath);
+
     }
 
     /** @test */
@@ -182,33 +247,6 @@ class ArticleFormTest extends TestCase
         ->set('article.content','Article content')
         ->assertHasNoErrors('article.content')
         ;
-    }
-
-     /** @test */
-    public function can_update_articles(){
-
-        $article = Article::factory()->create();
-
-        $user = User::factory()->create();
-
-        Livewire::actingAs($user)->test('article-form',['article' => $article])
-        ->assertSet('article.title', $article->title)
-        ->assertSet('article.slug', $article->slug)
-        ->assertSet('article.content', $article->content)
-        ->set('article.title','Title updated')
-        ->set('article.slug','updated-slug')
-        ->call('save')
-        ->assertSessionHas('status')
-        ->assertRedirect( route('articles.index') )
-        ;
-
-        $this->assertDatabaseCount('articles', 1 );
-
-        $this->assertDatabaseHas('articles',[
-            'title' => 'Title updated',
-            'slug' => 'updated-slug',
-            'user_id' => $user->id,
-        ]);
     }
 
      /** @test */

@@ -7,6 +7,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Storage;
 
 class ArticleForm extends Component{
 
@@ -17,7 +18,7 @@ class ArticleForm extends Component{
 
     public function rules(){
         return [
-            'image' => ['image','max:2048'],
+            'image' => [],
             'article.title' => ['required','min:4'],
             'article.slug' => [
                 'required',
@@ -62,16 +63,22 @@ class ArticleForm extends Component{
          
         $this->validate();
 
-        $this->article->image = $this->image->store('/', 'public');
+        if( $this->image ){
+            $this->article->image = $this->uploadImage();
+        }
 
         Auth::user()->articles()->save($this->article);
-        // $this->article->user_id = auth()->id;
-        // $this->article->save();
-        // Article::create($data);
-        //$this->reset(); //reseteo todas los propiedades del componente
+
         session()->flash('status',__('Artículo guardado') );
 
         $this->redirectRoute('articles.index'); //redirijo al listado de articulo
 
+    }
+
+    public function uploadImage(){
+        if( $oldImage = $this->article->image ){
+            Storage::disk('public')->delete( $oldImage );
+        }
+        return $this->image->store('/', 'public');
     }
 }
