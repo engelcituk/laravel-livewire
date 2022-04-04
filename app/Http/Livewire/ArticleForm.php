@@ -16,7 +16,9 @@ class ArticleForm extends Component{
 
     public Article $article;
     public $image;
+    public $newCategory;
     public $showCategoryModal = false;
+
 
     public function rules(){
         return [
@@ -36,29 +38,31 @@ class ArticleForm extends Component{
                 'required',
                 Rule::exists('categories', 'id')
             ],
+            'newCategory.name' => [],
+            'newCategory.slug' => [],
 
         ];
     }
-    
-    /*
-    protected $messages = [
-        'title.required' => 'El :attribute es obligatorio',
-    ];
-
-    protected $validationAttributes = [
-        'title' => 'título',
-    ];*/
 
     public function mount(Article $article)
     {
         $this->article = $article;
     }
 
-    public function render()
-    {
+    public function render(){
         return view('livewire.article-form',[
             'categories' => Category::pluck('name', 'id')
         ]);
+    }
+
+    public function openCategoryForm(){
+        $this->newCategory = new Category;
+        $this->showCategoryModal = true;
+    }
+
+    public function closeCategoryForm(){
+        $this->showCategoryModal = false;
+        $this->newCategory = null;
     }
 
     public function updated($propertyName)
@@ -66,9 +70,14 @@ class ArticleForm extends Component{
         $this->validateOnly($propertyName);
     }
 
-    public function updatedArticleTitle($title)
-    {
+    public function updatedArticleTitle($title){
+
         $this->article->slug = Str::slug($title);
+    }
+
+    public function updatedNewCategoryName($name){
+        
+        $this->newCategory->slug = Str::slug($name);
     }
 
     public function save(){
@@ -85,6 +94,12 @@ class ArticleForm extends Component{
 
         $this->redirectRoute('articles.index'); //redirijo al listado de articulo
 
+    }
+
+    public function saveNewCategory(){
+        $this->newCategory->save();
+        $this->article->category_id = $this->newCategory->id;
+        $this->closeCategoryForm();
     }
 
     public function uploadImage(){
