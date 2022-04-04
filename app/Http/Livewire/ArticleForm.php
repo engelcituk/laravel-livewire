@@ -16,6 +16,7 @@ class ArticleForm extends Component{
 
     public Article $article;
     public $image;
+    public $showCategoryModal = false;
 
     public function rules(){
         return [
