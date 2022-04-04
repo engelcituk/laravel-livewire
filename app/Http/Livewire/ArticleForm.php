@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire;
 use App\Models\Article;
+use App\Models\Category;
 use Livewire\Component;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
@@ -30,6 +31,8 @@ class ArticleForm extends Component{
             ],
                 //'unique:articles,slug,'.$this->article->id],// unico en la tabla articles, el campo slug, se ignora al editar
             'article.content' => ['required'],
+            'article.category_id' => [],
+
         ];
     }
     
@@ -49,7 +52,9 @@ class ArticleForm extends Component{
 
     public function render()
     {
-        return view('livewire.article-form');
+        return view('livewire.article-form',[
+            'categories' => Category::pluck('name', 'id')
+        ]);
     }
 
     public function updated($propertyName)

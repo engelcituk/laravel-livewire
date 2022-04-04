@@ -11,6 +11,7 @@ use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
 use App\Models\Article;
 use App\Models\User;
+use App\Models\Category;
 
 
 class ArticleFormTest extends TestCase
@@ -57,12 +58,15 @@ class ArticleFormTest extends TestCase
         $image = UploadedFile::fake()->image('post-image.png');
 
         $user = User::factory()->create();
+        $category = Category::factory()->create();
+
     
         Livewire::actingAs($user)->test('article-form')
         ->set('image', $image)
         ->set('article.title','New article')
         ->set('article.slug','new-article')
         ->set('article.content','Article content')
+        ->set('article.category_id',$category->id)
         ->call('save')
         ->assertSessionHas('status')
         ->assertRedirect( route('articles.index') )
@@ -75,6 +79,8 @@ class ArticleFormTest extends TestCase
             'slug' => 'new-article',
             'content' => 'Article content',
             'user_id' => $user->id,
+            'category_id' => $category->id,
+
         ]);
 
         Storage::disk('public')->assertExists($imagePath);
