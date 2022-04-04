@@ -31,7 +31,10 @@ class ArticleForm extends Component{
             ],
                 //'unique:articles,slug,'.$this->article->id],// unico en la tabla articles, el campo slug, se ignora al editar
             'article.content' => ['required'],
-            'article.category_id' => [],
+            'article.category_id' => [
+                'required',
+                Rule::exists('categories', 'id')
+            ],
 
         ];
     }
