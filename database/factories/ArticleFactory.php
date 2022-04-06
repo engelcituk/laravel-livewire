@@ -19,12 +19,15 @@ class ArticleFactory extends Factory
     public function definition()
     {
         return [
-            'image' => $this->faker->imageUrl,
-            'title' => $this->faker->sentence,
-            'slug' => $this->faker->slug,
-            'content' => $this->faker->paragraph,
+            'image' => $this->faker->imageUrl(),
+            'title' => $this->faker->sentence(),
+            'slug' => $this->faker->slug(),
+            'content' => $this->faker->paragraph(),
             'category_id' => Category::factory(),
             'user_id' => User::factory(),
         ];
     }
 }
+
+/*php artisan tinker
+Post::factory()->count(5)->create()*/
