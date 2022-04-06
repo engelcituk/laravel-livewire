@@ -105,9 +105,14 @@ class ArticleForm extends Component{
 
     public function delete(){
         
+        Storage::disk('public')->delete($this->article->image);
+
         $this->article->delete();
 
-        $this->redirect('/');
+        session()->flash('status',__('Artículo eliminado') );
+
+
+        $this->redirect( route('articles.index') );
     }
 
     public function saveNewCategory(){

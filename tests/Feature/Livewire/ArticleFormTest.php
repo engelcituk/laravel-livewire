@@ -36,11 +36,17 @@ class ArticleFormTest extends TestCase
 
         $user = User::factory()->create();
 
-        $this->actingAs($user)->get( route('articles.create') )->assertSeeLivewire('article-form');
+        $this->actingAs($user)->get( route('articles.create') )
+            ->assertSeeLivewire('article-form')
+            ->assertDontSeeText(__('Delete'))
+        ;
 
         $article = Article::factory()->create();
 
-        $this->actingAs($user)->get( route('articles.edit', $article) )->assertSeeLivewire('article-form');
+        $this->actingAs($user)->get( route('articles.edit', $article) )
+            ->assertSeeLivewire('article-form')
+            ->assertSeeText(__('Delete'))
+            ;
 
     }
     
@@ -86,6 +92,30 @@ class ArticleFormTest extends TestCase
         ]);
 
         Storage::disk('public')->assertExists($imagePath);
+    }
+
+    /** @test */
+    public function can_delete_articles(){
+
+        Storage::fake();
+        $imagePath = UploadedFile::fake()->image('post-image.png')->store('/', 'public');
+
+        $article = Article::factory()->create([
+            'image' => $imagePath
+        ]);
+
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test('article-form', ['article' => $article])
+        ->call('delete')
+        ->assertSessionHas('status')
+        ->assertRedirect( route('articles.index') )
+        ;
+
+        Storage::disk('public')->assertMissing($imagePath);
+
+        $this->assertDatabaseCount('articles', 0);
+        
     }
 
     /** @test */
@@ -209,7 +239,33 @@ class ArticleFormTest extends TestCase
 
         Storage::disk('public')->assertExists($article->fresh()->image); //fresh vuelve a consultar la información para tener la img actualizada
         Storage::disk('public')->assertMissing($oldImagePath);
+    }
 
+    /** @test */
+    function can_update_articles(){
+
+        $article = Article::factory()->create();
+
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test('article-form', ['article' => $article])
+            ->assertSet('article.title', $article->title)
+            ->assertSet('article.slug', $article->slug)
+            ->assertSet('article.content', $article->content)
+            ->assertSet('article.category_id', $article->category->id)
+            ->set('article.title', 'Updated title')
+            ->set('article.slug', 'updated-slug')
+            ->call('save')
+            ->assertSessionHas('status')
+            ->assertRedirect(route('articles.index'));
+
+        $this->assertDatabaseCount('articles', 1);
+
+        $this->assertDatabaseHas('articles', [
+            'title' => 'Updated title',
+            'slug' => 'updated-slug',
+            'user_id' => $user->id,
+        ]);
     }
 
     /** @test */
