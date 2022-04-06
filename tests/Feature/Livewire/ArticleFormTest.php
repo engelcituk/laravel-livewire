@@ -43,6 +43,7 @@ class ArticleFormTest extends TestCase
         $this->actingAs($user)->get( route('articles.edit', $article) )->assertSeeLivewire('article-form');
 
     }
+    
     /** @test */
     public function blade_template_is_wired_properly(){
         Livewire::test('article-form')
@@ -51,6 +52,7 @@ class ArticleFormTest extends TestCase
         ->assertSeeHtml('wire:model="article.slug"')
         ;
     }
+
     /** @test */
     public function can_create_new_articles(){
     
@@ -87,7 +89,75 @@ class ArticleFormTest extends TestCase
     }
 
     /** @test */
-    public function can_update_articles(){
+    public function can_create_new_category(){
+        
+        Livewire::test('article-form')
+        ->call('openCategoryForm')
+        ->set('newCategory.name','New category')
+        ->assertSet('newCategory.slug','new-category')
+        ->call('saveNewCategory')
+        ->assertSet('article.category_id', Category::first()->id)
+        ->assertSet('showCategoryModal', false)
+        ;
+
+        $this->assertDatabaseCount('categories', 1);
+    }
+    
+    /** @test */
+    public function new_category_name_is_required(){
+        Livewire::test('article-form')
+        ->call('openCategoryForm')
+        ->set('newCategory.slug','new-category')
+        ->call('saveNewCategory')
+        ->assertHasErrors(['newCategory.name'=> 'required'])
+        ->assertSeeHtml(__('validation.required',['attribute' => 'name']))
+        ;
+    }
+
+    /** @test */
+    public function new_category_slug_is_required(){
+        Livewire::test('article-form')
+        ->call('openCategoryForm')
+        ->set('newCategory.name','New category')
+        ->set('newCategory.slug', null)
+        ->call('saveNewCategory')
+        ->assertHasErrors(['newCategory.slug'=> 'required'])
+        ->assertSeeHtml(__('validation.required',['attribute' => 'slug']))
+        ;
+    }
+
+    /** @test */
+    public function new_category_name_must_be_unique(){
+
+        $category = Category::factory()->create();
+
+        Livewire::test('article-form')
+        ->call('openCategoryForm')
+        ->set('newCategory.name',$category->name)
+        ->set('newCategory.slug', 'new-category')
+        ->call('saveNewCategory')
+        ->assertHasErrors(['newCategory.name'=> 'unique'])
+        ->assertSeeHtml(__('validation.unique',['attribute' => 'name']));
+        ;
+    }
+
+    /** @test */
+    public function new_category_slug_must_be_unique(){
+
+        $category = Category::factory()->create();
+
+        Livewire::test('article-form')
+        ->call('openCategoryForm')
+        ->set('newCategory.name','new-category')
+        ->set('newCategory.slug', $category->slug)
+        ->call('saveNewCategory')
+        ->assertHasErrors(['newCategory.slug'=> 'unique'])
+        ->assertSeeHtml(__('validation.unique',['attribute' => 'slug']));
+        ;
+    }
+
+    /** @test */
+    public function can_update_newCategorys(){
 
         $article = Article::factory()->create();
         $user = User::factory()->create();
@@ -96,6 +166,7 @@ class ArticleFormTest extends TestCase
         ->assertSet('article.image', $article->image)
         ->assertSet('article.slug', $article->slug)
         ->assertSet('article.content', $article->content)
+        ->assertSet('article.category_id', $article->category->id)
         ->set('article.title','Title updated')
         ->set('article.slug','updated-slug')
         ->call('save')
