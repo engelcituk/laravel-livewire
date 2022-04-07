@@ -18,7 +18,6 @@ class ArticleForm extends Component{
     public $image;
     public $newCategory;
     public $showCategoryModal = false;
-    public $showDeleteModal = false;
 
     public function rules(){
         return [
@@ -103,18 +102,7 @@ class ArticleForm extends Component{
 
     }
 
-    public function delete(){
-        
-        Storage::disk('public')->delete($this->article->image);
-
-        $this->article->delete();
-
-        session()->flash('status',__('Artículo eliminado') );
-
-
-        $this->redirect( route('articles.index') );
-    }
-
+   
     public function saveNewCategory(){
 
         $this->validateOnly('newCategory.name');
