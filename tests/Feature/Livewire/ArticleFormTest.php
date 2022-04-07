@@ -94,29 +94,7 @@ class ArticleFormTest extends TestCase
         Storage::disk('public')->assertExists($imagePath);
     }
 
-    /** @test */
-    public function can_delete_articles(){
-
-        Storage::fake();
-        $imagePath = UploadedFile::fake()->image('post-image.png')->store('/', 'public');
-
-        $article = Article::factory()->create([
-            'image' => $imagePath
-        ]);
-
-        $user = User::factory()->create();
-
-        Livewire::actingAs($user)->test('article-form', ['article' => $article])
-        ->call('delete')
-        ->assertSessionHas('status')
-        ->assertRedirect( route('articles.index') )
-        ;
-
-        Storage::disk('public')->assertMissing($imagePath);
-
-        $this->assertDatabaseCount('articles', 0);
-        
-    }
+    
 
     /** @test */
     public function can_create_new_category(){
@@ -186,33 +164,6 @@ class ArticleFormTest extends TestCase
         ;
     }
 
-    /** @test */
-    public function can_update_newCategorys(){
-
-        $article = Article::factory()->create();
-        $user = User::factory()->create();
-
-        Livewire::actingAs($user)->test('article-form',['article' => $article])
-        ->assertSet('article.image', $article->image)
-        ->assertSet('article.slug', $article->slug)
-        ->assertSet('article.content', $article->content)
-        ->assertSet('article.category_id', $article->category->id)
-        ->set('article.title','Title updated')
-        ->set('article.slug','updated-slug')
-        ->call('save')
-        ->assertSessionHas('status')
-        ->assertRedirect( route('articles.index') )
-        ;
-
-        $this->assertDatabaseCount('articles', 1 );
-
-        $this->assertDatabaseHas('articles',[
-            'title' => 'Title updated',
-            'slug' => 'updated-slug',
-            'user_id' => $user->id,
-        ]);
-
-    }
 
     /** @test */
     public function can_update_articles_image(){
@@ -244,7 +195,9 @@ class ArticleFormTest extends TestCase
     /** @test */
     function can_update_articles(){
 
-        $article = Article::factory()->create();
+        $article = Article::factory()->create([
+            'image' => 'path/to/image'
+        ]);
 
         $user = User::factory()->create();
 
